@@ -29,6 +29,7 @@ void main() {
   _testMin();
   _testOfType();
   _testOrderBy();
+  _testOrderByWithObjects();
   _testPrepend();
   _testRange();
   _testRepeat();
@@ -819,6 +820,35 @@ void _testOrderBy() {
   });
 }
 
+void _testOrderByWithObjects() {
+  test("_testOrderByWithObjects", () {
+    {
+      var p1 = Pet("Fido", 1);
+      var p2 = Pet("Fido", 2);
+      var p3 = Pet("Rufus", 1);
+      var p4 = Pet("Spot", 1);
+
+      var data = new Collection<Pet>([p4, p3, p2, p1]);
+      var expected = [p1, p2, p3, p4];
+      var query = data.orderBy<Pet>((e) => e, PetComparer());
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+    //
+    {
+      var p1 = Pet("Fido", 1);
+      var p2 = Pet("Fido", 2);
+      var p3 = Pet("Rufus", 1);
+      var p4 = Pet("Spot", 1);
+
+      var data = new Collection<Pet>([p1, p2, p3, p4]);
+      var expected = [p4, p3, p2, p1];
+      var query = data.orderByDescending<Pet>((e) => e, PetComparer());
+      var result = query.asIterable();
+      expect(result, expected);
+    }
+  });}
+
 void _testPrepend() {
   test("Prepend", () {
     {
@@ -1392,4 +1422,17 @@ class PetOwner {
   IEnumerable<Pet> pets;
   PetOwner(this.name);
   String toString() => name;
+}
+
+class PetComparer implements IComparer<Pet> {
+
+  @override
+  int compare(Pet x, Pet y) {
+    int v1 = x.name.compareTo(y.name);
+
+    if (v1 == 0)
+      return x.age.compareTo(y.age);
+
+    return v1;
+  }
 }
